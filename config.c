@@ -42,6 +42,7 @@ void config_read_from_file(FILE *file){
         buffer = read_block(newConf, buffer);
         buffer = ltrim(buffer);
     }
+    free(buffer);
     currentConfig = newConf;
 }
 
@@ -86,8 +87,16 @@ char *read_host(Config *config, char *buf){
 
         buf = ltrim(buf);
         if(strcmp(ident, "mask") == 0){
-            buf = read_string(buf, &str, STRING_BUFFER - 1);
-            config->hosts[hostId].mask = strdup(str);
+            do{
+                buf = read_string(buf, &str, STRING_BUFFER - 1);
+
+                MaskList *newMask = (MaskList *)malloc(sizeof(MaskList));
+                newMask->mask = strdup(buf);
+                newMask->next = config->hosts[hostId].mask;
+                config->hosts[hostId].mask = newMask;
+
+                buf = ltrim(buf);
+            }while(*buf != ';');
         }else if(strcmp(ident, "root") == 0){
             buf = read_string(buf, &str, STRING_BUFFER - 1);
             config->hosts[hostId].root = strdup(str);

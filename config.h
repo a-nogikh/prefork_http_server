@@ -4,13 +4,20 @@
 #define HOSTS_LIMIT 128
 #define STRING_BUFFER 512
 
+struct MaskList{
+    MaskList *next;
+    char *mask;
+};
+
+typedef struct MaskList MaskList;
+
 struct Config{
     int min_children;
     int max_children;
     int child_max_queries;
     char *bind_to;
     struct Host{
-        char *mask;
+        MaskList *mask;
         char *root;
     } hosts[HOSTS_LIMIT];
     int hosts_count;

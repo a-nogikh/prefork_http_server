@@ -1,25 +1,9 @@
 #include "config_parser.h"
 #include "utils.h"
 
-int is_wspace(char c){
-    switch(c){
-    case ' ':
-    case '\t':
-    case '\n':
-    case '\r':
-        return 1;
-    }
-    return 0;
-}
-
 
 int is_alphanumeric(char c){
     return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_';
-}
-
-char *ltrim(char *in){
-    while(*in != 0 && is_wspace(*in)) in++;
-    return in;
 }
 
 char *consume(char *in, char *str){
