@@ -69,12 +69,35 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
         }
     }
 
-
     return max(0, lastLineEnd - origTo);
 }
 
 int http_query_request(char *start, char *end, http_parse_request *request){
-    // @TODO
+    start = ltrim(start);
+    int pos = 0;
+    while (*start && !is_wspace(*start)){
+        request->method[pos++] = *start++;
+        if (pos >= METHOD_SIZE_LIMIT){
+            break;
+        }
+    }
+    start = copy_till(start, request->method, ' ', METHOD_SIZE_LIMIT);
+    if (!start || ! (*start)){
+        return 0;
+    }
+    start = ltrim(start);
+
+    start = copy_till(start, request->path, ' ', PATH_SIZE_LIMIT);
+    if (!start || ! (*start)){
+        return 0;
+    }
+
+    start = copy_till(start, request->http_version, ' ', HTTP_VERSION_SIZE_LIMIT);
+    if (!start){
+        return 0;
+    }
+
+    return 1;
 }
 
 int http_query_keyvalue(char *start, char *end, http_parse_request *request){

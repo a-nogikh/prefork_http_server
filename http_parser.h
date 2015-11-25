@@ -3,6 +3,8 @@
 
 #define HEADER_SIZE_LIMIT 4096
 #define PATH_SIZE_LIMIT 256
+#define METHOD_SIZE_LIMIT 16
+#define HTTP_VERSION_SIZE_LIMIT 16
 
 #define STATE_PROCESSING_REQUEST_LINE 0
 #define STATE_PROCESSING_HEADER 1
@@ -33,8 +35,8 @@ struct http_parse_request{
     char *header_to;
 
     http_param_list *params;
-    char http_version[16];
-    char method[16];
+    char http_version[HTTP_VERSION_SIZE_LIMIT + 1];
+    char method[METHOD_SIZE_LIMIT + 1];
     char path[PATH_SIZE_LIMIT + 1];
 };
 typedef struct http_parse_request http_parse_request;
