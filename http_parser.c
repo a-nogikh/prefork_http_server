@@ -24,23 +24,23 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
         return 0;
     }
 
-    char *headEnd = request->header + HEADER_SIZE_LIMIT - 1,
-            *origTo = request->header_to;
+    char *head_end = request->header + HEADER_SIZE_LIMIT - 1,
+            *orig_to = request->header_to;
 
     // copy input data to request header buffer
-    while (request->header_to < headEnd && newBufSize-- > 0){
+    while (request->header_to < head_end && newBufSize-- > 0){
         *request->header_to++ = *newbuf++;
     }
 
-    char *lineEnd = request->header_curr, *lastLineEnd = origTo;
-    while (lineEnd + 1 <= headEnd && *lineEnd != '\0'){
-        if (*(lineEnd) != '\r' || *(lineEnd + 1) != '\n'){
-            lineEnd++;
+    char *line_end = request->header_curr, *last_line_end = orig_to;
+    while (line_end + 1 <= head_end && *line_end != '\0'){
+        if (*(line_end) != '\r' || *(line_end + 1) != '\n'){
+            line_end++;
             continue;
         }
 
-        lastLineEnd = lineEnd + 1;
-        int lineSize = lineEnd - request->header_curr - 1;
+        last_line_end = line_end + 1;
+        int lineSize = line_end - request->header_curr - 1;
         if (lineSize <= 0){ // empty line
             if(request->state == STATE_PROCESSING_HEADER
                      && request->seq_empty_line_count == 0){
@@ -49,27 +49,27 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
                       && request->seq_empty_line_count == 1){
                 // end of header
                 request->state = STATE_HEADER_DONE;
-                return max(lineEnd + 1 - origTo, 0);
+                return max(line_end + 1 - orig_to, 0);
             }else{
                 STOP_ERROR(request);
             }
-            request->header_curr = lineEnd + 1;
-            lineEnd += 2;
+            request->header_curr = line_end + 1;
+            line_end += 2;
         }else{ // non-empty line
             if (request->state == STATE_PROCESSING_REQUEST_LINE
-                && !http_query_request(request->header_curr, lineEnd, request)){
+                && !http_query_request(request->header_curr, line_end, request)){
                 STOP_ERROR(request);
             }else if (request->state == STATE_PROCESSING_HEADER
-                && !http_query_keyvalue(request->header_curr, lineEnd, request)){
+                && !http_query_keyvalue(request->header_curr, line_end, request)){
                 STOP_ERROR(request);
             }
-            request->header_curr = lineEnd + 1;
+            request->header_curr = line_end + 1;
             request->seq_empty_line_count = 0;
-            lineEnd += 2;
+            line_end += 2;
         }
     }
 
-    return max(0, lastLineEnd - origTo);
+    return max(0, last_line_end - orig_to);
 }
 
 int http_query_request(char *start, char *end, http_parse_request *request){
@@ -102,18 +102,18 @@ int http_query_request(char *start, char *end, http_parse_request *request){
 
 int http_query_keyvalue(char *start, char *end, http_parse_request *request){
     start = ltrim(start);
-    char *keyEnd = strstr(buf, ":"), *key, *value;
-    if (!keyEnd || keyEnd > end){
+    char *key_end = strstr(buf, ":"), *key, *value;
+    if (!key_end || key_end > end){
         return 0;
     }
 
-    int keyLen = keyEnd - answer + 1;
-    key = (char *)malloc(sizeof(char)*(keyLen + 1));
-    memcpy(key, start, keyLen);
-    key[keyLen] = '\0';
+    int key_len = key_end - answer + 1;
+    key = (char *)malloc(sizeof(char)*(key_len + 1));
+    memcpy(key, start, key_len);
+    key[key_len] = '\0';
     key = rtrim(key);
 
-    start = keyEnd + 1;
+    start = key_end + 1;
     while(start < end && is_wspace(start)) start++;
 
     int valueLen = end - start;
@@ -135,13 +135,13 @@ int http_query_keyvalue(char *start, char *end, http_parse_request *request){
 }
 
 void free_request(http_parse_request *request){
-    http_param_list *currParam = request->params;
-    while (currParam != NULL){
-        http_param_list *next = currParam->next;
-        free(currParam->key);
-        free(currParam->value);
-        free(currParam);
-        currParam = next;
+    http_param_list *curr_param = request->params;
+    while (curr_param != NULL){
+        http_param_list *next = curr_param->next;
+        free(curr_param->key);
+        free(curr_param->value);
+        free(curr_param);
+        curr_param = next;
     }
     free(request);
 }

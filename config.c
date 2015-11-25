@@ -6,22 +6,22 @@
 #include "utils.h"
 
 
-struct Config *currentConfig =  NULL;
+struct Config *current_config =  NULL;
 
 char *read_host(struct Config *config, char *buf);
 char *read_block(struct Config *config, char *buf);
 
 struct Config *config_get(){
-    if(!currentConfig){
-        currentConfig = (struct Config *)malloc(sizeof(struct Config));
+    if(!current_config){
+        current_config = (struct Config *)malloc(sizeof(struct Config));
 
-        currentConfig->bind_to = "127.0.0.1:80";
-        currentConfig->child_max_queries = 100;
-        currentConfig->min_children = 1;
-        currentConfig->max_children = 2;
-        currentConfig->hosts_count = 0;
+        current_config->bind_to = "127.0.0.1:80";
+        current_config->child_max_queries = 100;
+        current_config->min_children = 1;
+        current_config->max_children = 2;
+        current_config->hosts_count = 0;
     }
-    return currentConfig;
+    return current_config;
 }
 
 void config_read_from_file(FILE *file){
@@ -35,15 +35,15 @@ void config_read_from_file(FILE *file){
     memset(buffer, 0, length+1);
     fread (buffer, 1, length, file);
 
-    Config *newConf = (Config *)malloc(sizeof(Config));
-    newConf->hosts_count = 0;
+    Config *new_conf = (Config *)malloc(sizeof(Config));
+    new_conf->hosts_count = 0;
     while(*buffer){
         buffer = ltrim(buffer);
-        buffer = read_block(newConf, buffer);
+        buffer = read_block(new_conf, buffer);
         buffer = ltrim(buffer);
     }
     free(buffer);
-    currentConfig = newConf;
+    current_config = new_conf;
 }
 
 char *read_block(Config *config, char *buf){
@@ -74,8 +74,8 @@ char *read_block(Config *config, char *buf){
 }
 
 char *read_host(Config *config, char *buf){
-    int hostId = config->hosts_count;
-    if (hostId >= HOSTS_LIMIT){
+    int host_id = config->hosts_count;
+    if (host_id >= HOSTS_LIMIT){
         die_with_error("hosts limit reached");
     }
     config->hosts_count++;
@@ -92,14 +92,14 @@ char *read_host(Config *config, char *buf){
 
                 MaskList *newMask = (MaskList *)malloc(sizeof(MaskList));
                 newMask->mask = strdup(buf);
-                newMask->next = config->hosts[hostId].mask;
-                config->hosts[hostId].mask = newMask;
+                newMask->next = config->hosts[host_id].mask;
+                config->hosts[host_id].mask = newMask;
 
                 buf = ltrim(buf);
             }while(*buf != ';');
         }else if(strcmp(ident, "root") == 0){
             buf = read_string(buf, &str, STRING_BUFFER - 1);
-            config->hosts[hostId].root = strdup(str);
+            config->hosts[host_id].root = strdup(str);
         }else if(strlen(ident) == 0){
             break;
         }
