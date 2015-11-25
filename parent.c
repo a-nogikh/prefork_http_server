@@ -26,7 +26,7 @@ void init_server(){
         children[i].state = SERVER_ITEM_DEAD;
     }
 
-    Config *config = config_get();
+    config *config = config_get();
     bind_server(config);
 
     int base_fork = config->min_children;
@@ -41,7 +41,7 @@ void init_server(){
     used_children = baseFork;
 }
 
-void bind_server(Config *conf){
+void bind_server(config *conf){
     sockaddr_in addr;
     if (!str_to_sockaddr_ipv4(config->bind_to, &addr)){
         die_with_error("bind: parse failed");
@@ -78,7 +78,7 @@ void fork_child(ServerItem *item){
 }
 
 void check_children(){
-    Config *config = config_get();
+    config *config = config_get();
     int alive_count = 0, available_count = 0, i =0;
 
     for(; i < used_children; i++){

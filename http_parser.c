@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <string>
 
-http_parse_request* create_request(){
+http_parse_request* http_parse_create_request(){
     http_parse_request *item = (http_parse_request *)malloc(sizeof(http_parse_request));
     item->header_curr = item->header;
     item->header_to = item->header;
@@ -134,7 +134,18 @@ int http_query_keyvalue(char *start, char *end, http_parse_request *request){
     return 1;
 }
 
-void free_request(http_parse_request *request){
+char * http_parser_find_param(http_parse_request *request, char *param_name){
+    http_param_list *curr = request->params;
+    while (*curr != NULL){
+        if (stricmp(curr->key, param_name) == 0){
+            return curr->value;
+        }
+        curr = curr->next;
+    }
+    return NULL;
+}
+
+void http_parse_free_request(http_parse_request *request){
     http_param_list *curr_param = request->params;
     while (curr_param != NULL){
         http_param_list *next = curr_param->next;

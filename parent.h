@@ -4,7 +4,7 @@
 
 typedef enum {
     SERVER_ITEM_AVAILABLE,
-    SERVER_ITEM_RUNNING,
+    SERVER_ITEM_BUSY,
     SERVER_ITEM_DEAD
 } ServerItemState;
 

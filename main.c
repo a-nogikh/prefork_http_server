@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "config.h"
+
+
+#define CHILD_CHECK_INTERVAL_USEC 50000L // 50 ms
 
 void read_config(){
     FILE *file = fopen("server.cfg", "r");
@@ -10,7 +14,10 @@ void read_config(){
 int main()
 {
     read_config();
-
-    Config *cf = config_get();
+    init_server();
+    while (1){
+        check_children();
+        usleep(CHILD_CHECK_INTERVAL_USEC);
+    }
     return 0;
 }

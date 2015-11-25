@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <time.h>
 
 int is_wspace(char c){
     switch(c){
@@ -47,6 +48,16 @@ char* copy_till(char *src, char *dest, char till, int limit){
     return 0;
 }
 
+int ends_with(char *str, char *cmp){
+    int a_len = strlen(str);
+    int b_len = strlen(cmp);
+    if (a_len < b_len){
+        return 0;
+    }
+
+    return stricmp(str+(b-a), cmp) == 0 ? 1 : 0;
+}
+
 int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
     bzero((char *) dst, sizeof(sockaddr_in));
     src = ltrim(rtrim(src));
@@ -68,7 +79,7 @@ int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
     addr = ltrim(rtrim(addr));
     port = ltrim(rtrim(port));
 
-    if (!inet_pton(AF_INET, "192.0.2.33", &(dst->sin_addr))){
+    if (!inet_pton(AF_INET, addr, &(dst->sin_addr))){
         return 0;
     }
 
@@ -81,6 +92,13 @@ int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
     dst->sin_port = n;
     dst->sin_family = AF_INET;
     return 1;
+}
+
+int file_length(FILE *file){
+    fseek(f, 0, SEEK_END);
+    int s = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    return s;
 }
 
 void die_with_error(char *error_text){

@@ -41,5 +41,9 @@ struct http_parse_request{
 };
 typedef struct http_parse_request http_parse_request;
 
+http_parse_request* http_parse_create_request();
+int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSize);
+char* http_parser_find_param(http_parse_request *request, char *param_name);
+void http_parse_free_request(http_parse_request *request);
 
 #endif // HTTP_PARSER_H_INCLUDED

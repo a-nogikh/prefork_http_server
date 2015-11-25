@@ -6,14 +6,14 @@
 #include "utils.h"
 
 
-struct Config *current_config =  NULL;
+struct config *current_config =  NULL;
 
-char *read_host(struct Config *config, char *buf);
-char *read_block(struct Config *config, char *buf);
+char *read_host(struct config *config, char *buf);
+char *read_block(struct config *config, char *buf);
 
-struct Config *config_get(){
+struct config *config_get(){
     if(!current_config){
-        current_config = (struct Config *)malloc(sizeof(struct Config));
+        current_config = (struct config *)malloc(sizeof(struct config));
 
         current_config->bind_to = "127.0.0.1:80";
         current_config->child_max_queries = 100;
@@ -25,17 +25,12 @@ struct Config *config_get(){
 }
 
 void config_read_from_file(FILE *file){
-    int length = 0;
-    char *buffer;
-
-    fseek (file, 0, SEEK_END);
-    length = ftell (file);
-    fseek (file, 0, SEEK_SET);
-    buffer = malloc (length+1);
+    int length = file_length(file);
+    char *buffer = malloc (length+1);
     memset(buffer, 0, length+1);
     fread (buffer, 1, length, file);
 
-    Config *new_conf = (Config *)malloc(sizeof(Config));
+    config *new_conf = (config *)malloc(sizeof(config));
     new_conf->hosts_count = 0;
     while(*buffer){
         buffer = ltrim(buffer);
@@ -46,7 +41,7 @@ void config_read_from_file(FILE *file){
     current_config = new_conf;
 }
 
-char *read_block(Config *config, char *buf){
+char *read_block(config *config, char *buf){
     buf = ltrim(buf);
     char ident[64], str[STRING_BUFFER];
     buf = read_ident(buf, ident, 64 - 1);
@@ -73,7 +68,7 @@ char *read_block(Config *config, char *buf){
     return buf;
 }
 
-char *read_host(Config *config, char *buf){
+char *read_host(config *config, char *buf){
     int host_id = config->hosts_count;
     if (host_id >= HOSTS_LIMIT){
         die_with_error("hosts limit reached");
@@ -90,10 +85,10 @@ char *read_host(Config *config, char *buf){
             do{
                 buf = read_string(buf, &str, STRING_BUFFER - 1);
 
-                MaskList *newMask = (MaskList *)malloc(sizeof(MaskList));
-                newMask->mask = strdup(buf);
-                newMask->next = config->hosts[host_id].mask;
-                config->hosts[host_id].mask = newMask;
+                mask_list *new_mask = (mask_list *)malloc(sizeof(mask_list));
+                new_mask->mask = strdup(buf);
+                new_mask->next = config->hosts[host_id].mask;
+                config->hosts[host_id].mask = new_mask;
 
                 buf = ltrim(buf);
             }while(*buf != ';');
@@ -104,7 +99,7 @@ char *read_host(Config *config, char *buf){
             break;
         }
         else{
-            die_with_error("unknown identifier2 ");
+            die_with_error("unknown identifier ");
         }
 
         buf = consume(ltrim(buf), ";");
@@ -112,4 +107,22 @@ char *read_host(Config *config, char *buf){
     return buf;
 }
 
+config_host* find_host(char *host){
+    // @TODO implement real host masks
+    if (current_config == NULL){
+        continue;
+    }
 
+    int i;
+    for (i = 0; i < current_config->hosts_count; i++){
+        mask_list *mask = current_config->hosts[i];
+        while (mask != NULL){
+            if (strcmp(mask, "*") == 0 || stricmp(mask, host) == 0){
+                return &(current_config->hosts[i]);
+            }
+            mask = mask->next;
+        }
+    }
+
+    return NULL;
+}

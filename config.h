@@ -4,27 +4,29 @@
 #define HOSTS_LIMIT 128
 #define STRING_BUFFER 512
 
-struct MaskList{
-    MaskList *next;
+struct mask_list{
+    mask_list *next;
     char *mask;
 };
+typedef struct mask_list mask_list;
 
-typedef struct MaskList MaskList;
+struct config_host{
+    mask_list *mask;
+    char *root;
+};
+typedef struct config_host config_host;
 
-struct Config{
+struct config{
     int min_children;
     int max_children;
     int child_max_queries;
     char *bind_to;
-    struct Host{
-        MaskList *mask;
-        char *root;
-    } hosts[HOSTS_LIMIT];
+    config_host hosts[HOSTS_LIMIT];
     int hosts_count;
 };
-typedef struct Config Config;
+typedef struct config config;
 
-Config *config_get();
+config *config_get();
 void config_read_from_file(FILE *file);
 
 #endif // CONFIG_H_INCLUDED
