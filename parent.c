@@ -4,10 +4,15 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include "client.h"
+#include "utils.h"
+#includ "config.h"
 
 static ServerItem *children;
 int used_children = 0;
 int server_socket;
+
+void sigchld_handler(int sig);
 
 void init_server(){
     // setting SIGCHLD handler
@@ -73,13 +78,13 @@ void fork_child(ServerItem *item){
         item->pid = pid;
     }
     else if (pid == 0){
-        client_process(server_socket, item);
+        process_client(server_socket, item);
     }
 }
 
 void check_children(){
     config *config = config_get();
-    int alive_count = 0, available_count = 0, i =0;
+    int alive_count = 0, available_count = 0, i = 0;
 
     for(; i < used_children; i++){
         if (children[i].state == SERVER_ITEM_DEAD){
@@ -97,12 +102,12 @@ void check_children(){
         add_count = config->min_children - alive_count;
     }
     if (available_count == 0 && add_count == 0
-        && alive_count < config->max_children
+        && alive_count + 1 < config->max_children
         && alive_count + 1 < MAX_CHILD_COUNT){
             add_count = 1;
     }
 
-    for (i=0; i<used_children && add_count > 0; i++){
+    for (i = 0; i < used_children && add_count > 0; i++){
         if (children[i].state == SERVER_ITEM_DEAD){
             fork_child(children[i]);
             add_count--;

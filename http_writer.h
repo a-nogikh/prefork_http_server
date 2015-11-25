@@ -2,6 +2,9 @@
 #define HTTP_WRITER_H_INCLUDED
 
 void http_write_status_line(int fd, const char *http_version, const char *status_code, const char *error_phrase);
+void http_write_header(int fd, const char *key, const char *value);
+void http_write_int_header(int fd, const char *key, int value);
+void http_empty_line(int fd);
 
 #define STATUS_200 (fd, http_version) http_write_status_line(fd, http_version, "200", "OK")
 #define STATUS_400 (fd, http_version) http_write_status_line(fd, http_version, "400", "Bad Request")

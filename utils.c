@@ -48,16 +48,6 @@ char* copy_till(char *src, char *dest, char till, int limit){
     return 0;
 }
 
-int ends_with(char *str, char *cmp){
-    int a_len = strlen(str);
-    int b_len = strlen(cmp);
-    if (a_len < b_len){
-        return 0;
-    }
-
-    return stricmp(str+(b-a), cmp) == 0 ? 1 : 0;
-}
-
 int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
     bzero((char *) dst, sizeof(sockaddr_in));
     src = ltrim(rtrim(src));
@@ -102,6 +92,6 @@ int file_length(FILE *file){
 }
 
 void die_with_error(char *error_text){
-        printf("%s", error_text);
-        exit(1);
+    printf("%s", error_text);
+    exit(1);
 }

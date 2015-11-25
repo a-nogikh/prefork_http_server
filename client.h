@@ -6,4 +6,6 @@
 
 #define END_CLIENT() { item->state = SERVER_ITEM_AVAILABLE; close(client_fd); http_parse_free_request(request); }
 
+void process_client(int server_socket, ServerItem *item);
+
 #endif // CLIENT_H_INCLUDED

@@ -16,7 +16,7 @@ http_parse_request* http_parse_create_request(){
 Process yet another block of input socket data.
 newbuf - block of data of newBufSize size
 
-returns number of used newbuf characters (unused data corresponds to message body)
+returns the number of used newbuf characters (unused data corresponds to message body)
 */
 int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSize){
     if (request->state != STATE_PROCESSING_REQUEST_LINE &&
@@ -29,8 +29,9 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
 
     // copy input data to request header buffer
     while (request->header_to < head_end && newBufSize-- > 0){
-        *request->header_to++ = *newbuf++;
+        *(request->header_to)++ = *newbuf++;
     }
+    *(request->header_to) = '\0';
 
     char *line_end = request->header_curr, *last_line_end = orig_to;
     while (line_end + 1 <= head_end && *line_end != '\0'){
@@ -38,24 +39,28 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
             line_end++;
             continue;
         }
+        // Now we have a complete line in request->header to be processed
 
         last_line_end = line_end + 1;
-        int lineSize = line_end - request->header_curr - 1;
-        if (lineSize <= 0){ // empty line
-            if(request->state == STATE_PROCESSING_HEADER
-                     && request->seq_empty_line_count == 0){
+        int line_size = line_end - request->header_curr - 1;
+        if (line_size <= 0){
+            // Processing empty line case
+            if(request->state == STATE_PROCESSING_HEADER && request->seq_empty_line_count == 0){
                 request->seq_empty_line_count++;
-            }else if (request->state == STATE_PROCESSING_HEADER
-                      && request->seq_empty_line_count == 1){
+            }
+            else if (request->state == STATE_PROCESSING_HEADER && request->seq_empty_line_count == 1){
                 // end of header
                 request->state = STATE_HEADER_DONE;
                 return max(line_end + 1 - orig_to, 0);
-            }else{
+            }
+            else{
                 STOP_ERROR(request);
             }
             request->header_curr = line_end + 1;
             line_end += 2;
-        }else{ // non-empty line
+        }
+        else{
+            // Processing non-empty line
             if (request->state == STATE_PROCESSING_REQUEST_LINE
                 && !http_query_request(request->header_curr, line_end, request)){
                 STOP_ERROR(request);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "config.h"
+#include "parent.h"
 
 
 #define CHILD_CHECK_INTERVAL_USEC 50000L // 50 ms

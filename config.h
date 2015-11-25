@@ -28,5 +28,6 @@ typedef struct config config;
 
 config *config_get();
 void config_read_from_file(FILE *file);
+config_host* find_host(char *host);
 
 #endif // CONFIG_H_INCLUDED

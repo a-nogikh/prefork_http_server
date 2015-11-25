@@ -14,4 +14,7 @@ struct ServerItem{
 };
 typedef struct ServerItem ServerItem;
 
+void init_server();
+void check_children();
+
 #endif // PARENT_H_INCLUDED

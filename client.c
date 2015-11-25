@@ -8,9 +8,10 @@
 #include "parent.h"
 #include "config.h"
 #include "mime.h"
+#include "utils.h"
 
 
-void client_process(int server_socket, ServerItem *item){
+void process_client(int server_socket, ServerItem *item){
     char buffer[1024];
     config *config  = config_get();
 
