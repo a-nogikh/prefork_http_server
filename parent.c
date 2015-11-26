@@ -3,12 +3,13 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <netinet/in.h>
 #include <time.h>
 #include "client.h"
 #include "utils.h"
-#includ "config.h"
+#include "config.h"
 
-static ServerItem *children;
+static server_item *children;
 int used_children = 0;
 int server_socket;
 
@@ -22,7 +23,7 @@ void init_server(){
     sigaction(SIGCHLD, &sa, NULL);
 
     // allocating shared memory
-    children = mmap(NULL, (sizeof ServerItem) * (MAX_CHILD_COUNT + 1),
+    children = mmap(NULL, sizeof (server_item) * (MAX_CHILD_COUNT + 1),
         PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
     int i = 0;
@@ -43,12 +44,12 @@ void init_server(){
         fork_child(children[i]);
     }
 
-    used_children = baseFork;
+    used_children = base_fork;
 }
 
 void bind_server(config *conf){
-    sockaddr_in addr;
-    if (!str_to_sockaddr_ipv4(config->bind_to, &addr)){
+    struct sockaddr_in addr;
+    if (str_to_sockaddr_ipv4(conf->bind_to, &addr) == 0){
         die_with_error("bind: parse failed");
     }
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,7 +65,7 @@ void bind_server(config *conf){
     listen(server_socket,512);
 }
 
-void fork_child(ServerItem *item){
+void fork_child(server_item *item){
     if (item->state != SERVER_ITEM_DEAD){
         return;
     }
@@ -109,7 +110,7 @@ void check_children(){
 
     for (i = 0; i < used_children && add_count > 0; i++){
         if (children[i].state == SERVER_ITEM_DEAD){
-            fork_child(children[i]);
+            fork_child(children + i);
             add_count--;
             available_count++;
         }
@@ -117,7 +118,7 @@ void check_children(){
 
     if (add_count > 0){
         for(i = used_children; i < (used_children + add_count); i++){
-            fork_child(children[i]);
+            fork_child(children + i);
         }
     }
 }

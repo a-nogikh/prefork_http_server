@@ -1,5 +1,6 @@
-#include <string>
+#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "http_writer.h"
 
 void http_write_status_line(int fd, const char *http_version, const char *status_code, const char *error_phrase){
@@ -20,7 +21,7 @@ void http_write_header(int fd, const char *key, const char *value){
 
 void http_write_int_header(int fd, const char *key, int value){
     char data[32];
-    itoa(value, data, 32);
+    sprintf(data, "%d", value);
     http_write_header(fd, key, data);
 }
 

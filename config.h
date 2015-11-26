@@ -1,11 +1,14 @@
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
+#include <sys/types.h>
+#include <stdio.h>
+
 #define HOSTS_LIMIT 128
 #define STRING_BUFFER 512
 
 struct mask_list{
-    mask_list *next;
+    struct mask_list *next;
     char *mask;
 };
 typedef struct mask_list mask_list;

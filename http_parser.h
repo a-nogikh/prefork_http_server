@@ -6,15 +6,11 @@
 #define METHOD_SIZE_LIMIT 16
 #define HTTP_VERSION_SIZE_LIMIT 16
 
-#define STATE_PROCESSING_REQUEST_LINE 0
-#define STATE_PROCESSING_HEADER 1
-#define STATE_HEADER_DONE 2
-#define STATE_ERROR -1
 
 #define STOP_ERROR(req) { req->state = STATE_ERROR; return 0; }
 
 typedef enum {
-    STATE_ERROR
+    STATE_ERROR,
     STATE_PROCESSING_REQUEST_LINE,
     STATE_PROCESSING_HEADER,
     STATE_HEADER_DONE
@@ -23,7 +19,7 @@ typedef enum {
 struct http_param_list{
     char *key;
     char *value;
-    http_param_list *next;
+    struct http_param_list *next;
 };
 typedef struct http_param_list http_param_list;
 

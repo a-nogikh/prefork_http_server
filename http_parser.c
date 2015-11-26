@@ -1,6 +1,7 @@
 #include "http_parser.h"
 #include "utils.h"
-#include <string>
+#include <string.h>
+#include <sys/param.h>
 
 http_parse_request* http_parse_create_request(){
     http_parse_request *item = (http_parse_request *)malloc(sizeof(http_parse_request));
@@ -107,12 +108,12 @@ int http_query_request(char *start, char *end, http_parse_request *request){
 
 int http_query_keyvalue(char *start, char *end, http_parse_request *request){
     start = ltrim(start);
-    char *key_end = strstr(buf, ":"), *key, *value;
+    char *key_end = strstr(start, ":"), *key, *value;
     if (!key_end || key_end > end){
         return 0;
     }
 
-    int key_len = key_end - answer + 1;
+    int key_len = key_end - start + 1;
     key = (char *)malloc(sizeof(char)*(key_len + 1));
     memcpy(key, start, key_len);
     key[key_len] = '\0';
@@ -141,7 +142,7 @@ int http_query_keyvalue(char *start, char *end, http_parse_request *request){
 
 char * http_parser_find_param(http_parse_request *request, char *param_name){
     http_param_list *curr = request->params;
-    while (*curr != NULL){
+    while (curr != NULL){
         if (stricmp(curr->key, param_name) == 0){
             return curr->value;
         }

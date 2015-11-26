@@ -110,12 +110,12 @@ char *read_host(config *config, char *buf){
 config_host* find_host(char *host){
     // @TODO implement real host masks
     if (current_config == NULL){
-        continue;
+        return NULL;
     }
 
     int i;
     for (i = 0; i < current_config->hosts_count; i++){
-        mask_list *mask = current_config->hosts[i];
+        mask_list *mask = current_config->hosts[i].mask;
         while (mask != NULL){
             if (strcmp(mask, "*") == 0 || stricmp(mask, host) == 0){
                 return &(current_config->hosts[i]);

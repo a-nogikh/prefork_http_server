@@ -2,17 +2,19 @@
 #define PARENT_H_INCLUDED
 #define MAX_CHILD_COUNT 1000
 
+#include <sys/types.h>
+
 typedef enum {
     SERVER_ITEM_AVAILABLE,
     SERVER_ITEM_BUSY,
     SERVER_ITEM_DEAD
 } ServerItemState;
 
-struct ServerItem{
+struct server_item{
     ServerItemState state;
     pid_t pid;
 };
-typedef struct ServerItem ServerItem;
+typedef struct server_item server_item;
 
 void init_server();
 void check_children();

@@ -34,7 +34,7 @@ char* copy_till(char *src, char *dest, char till, int limit){
 
     int pos = 0;
     while (*src && *src != till){
-        *dest++ = *start++;
+        *dest++ = *src++;
         if (pos >= limit){
             break;
         }
@@ -48,8 +48,8 @@ char* copy_till(char *src, char *dest, char till, int limit){
     return 0;
 }
 
-int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
-    bzero((char *) dst, sizeof(sockaddr_in));
+int str_to_sockaddr_ipv4(char *src, struct sockaddr_in *dst){
+    bzero((char *) dst, sizeof(struct sockaddr_in));
     src = ltrim(rtrim(src));
 
     char addr[32];
@@ -66,15 +66,15 @@ int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
         return 0;
     }
 
-    addr = ltrim(rtrim(addr));
-    port = ltrim(rtrim(port));
+    char *addr_p = ltrim(rtrim(addr));
+    char *port_p = ltrim(rtrim(port));
 
-    if (!inet_pton(AF_INET, addr, &(dst->sin_addr))){
+    if (!inet_pton(AF_INET, addr_p, &(dst->sin_addr))){
         return 0;
     }
 
     char *ep;
-    int n = strtol(port, ep, 10);
+    int n = strtol(port_p, ep, 10);
     if (*ep != 0 || n <= 0){
         return 0;
     }
@@ -85,9 +85,9 @@ int str_to_sockaddr_ipv4(char *src, sockaddr_in *dst){
 }
 
 int file_length(FILE *file){
-    fseek(f, 0, SEEK_END);
-    int s = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    fseek(file, 0, SEEK_END);
+    int s = ftell(file);
+    fseek(file, 0, SEEK_SET);
     return s;
 }
 

@@ -3,15 +3,18 @@
 #include <sys/socket.h>
 #include <sys/sendfile.h>
 #include <netinet/in.h>
+#include <string.h>
 #include <errno.h>
 #include "client.h"
+#include "http_parser.h"
 #include "parent.h"
 #include "config.h"
 #include "mime.h"
+#include "http_writer.h"
 #include "utils.h"
 
 
-void process_client(int server_socket, ServerItem *item){
+void process_client(int server_socket, server_item *item){
     char buffer[1024];
     config *config  = config_get();
 
@@ -51,16 +54,15 @@ void process_client(int server_socket, ServerItem *item){
                 break;
             }
         }
-
         processed_clients++;
 
         if (request->state != STATE_HEADER_DONE){
             if (request->state == STATE_ERROR && strlen){
                 STATUS_400(fd, HTTP_1_0);
                 write_error_headers(fd);
-                END_CLIENT();
+                END_CLIENT(item, fd, request);
             }
-            END_CLIENT();
+            END_CLIENT(item, fd, request);
             continue;
         }
 
@@ -69,14 +71,14 @@ void process_client(int server_socket, ServerItem *item){
 
             STATUS_400(fd, HTTP_1_0);
             write_error_headers(fd);
-            END_CLIENT();
+            END_CLIENT(item, fd, request);
             continue;
         }
 
         if (stricmp(request->method, "get") != 0){
             STATUS_405(fd, HTTP_1_0);
             write_error_headers(fd);
-            END_CLIENT();
+            END_CLIENT(item, fd, request);
             continue;
         }
 
@@ -90,7 +92,7 @@ void process_client(int server_socket, ServerItem *item){
         if (host_param == NULL || host == NULL){
             STATUS_404(fd, HTTP_1_0);
             write_error_headers(fd);
-            END_CLIENT();
+            END_CLIENT(item, fd, request);
             continue;
         }
 
@@ -100,7 +102,7 @@ void process_client(int server_socket, ServerItem *item){
         }
 
         respond_file(fd, host, request->path);
-        END_CLIENT();
+        END_CLIENT(item, fd, request);
 
         item->state = SERVER_ITEM_AVAILABLE;
     }
@@ -108,7 +110,7 @@ void process_client(int server_socket, ServerItem *item){
 
 void respond_file(int fd, config_host *host, char *path){
     char fullpath[512];
-    int root_len = strlen(host->root), path_len = strlen(request->path);
+    int root_len = strlen(host->root), path_len = strlen(path);
     if (root_len < 1 || path_len < 1 || root_len + path_len + 2 >= 512){
         STATUS_400(fd, HTTP_1_0);
         write_error_headers(fd);
@@ -134,7 +136,7 @@ void respond_file(int fd, config_host *host, char *path){
     STATUS_200(fd, HTTP_1_0);
     write_base_headers(fd);
 
-    int len = file_len(file);
+    int len = file_length(file);
     PARAM_CONTENT_LENGTH(fd, len);
     PARAM_CONTENT_TYPE(fd, detect_mime_type(path, file));
     http_empty_line(fd);

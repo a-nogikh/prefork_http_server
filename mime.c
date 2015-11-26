@@ -1,9 +1,9 @@
 #include "mime.h"
-
+#include "utils.h"
+#include <string.h>
 
 const char* detect_mime_type(char *filename, FILE *fd){
     // @TODO read first file bytes ..
-
 
     char *ext = strrchr(filename, "/");
     if (ext == NULL){
