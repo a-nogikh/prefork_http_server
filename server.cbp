@@ -47,9 +47,17 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="http_parser.h" />
+		<Unit filename="http_writer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="http_writer.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="mime.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mime.h" />
 		<Unit filename="parent.c">
 			<Option compilerVar="CC" />
 		</Unit>
