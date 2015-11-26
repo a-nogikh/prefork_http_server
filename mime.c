@@ -5,12 +5,12 @@
 const char* detect_mime_type(char *filename, FILE *fd){
     // @TODO read first file bytes ..
 
-    char *ext = strrchr(filename, "/");
+    char *ext = strrchr(filename, '/');
     if (ext == NULL){
         ext = filename;
     }
 
-    ext = strrchr(filename, ".");
+    ext = strrchr(filename, '.');
     if (ext == NULL){
         return "text/html";
     }

@@ -91,6 +91,15 @@ int file_length(FILE *file){
     return s;
 }
 
+const char * current_time(){
+    static char local_copy[64];
+    memset(local_copy, '\0', sizeof(local_copy));
+    time_t curtime  = time (NULL);
+    strcpy(local_copy,asctime(localtime (&curtime)));
+    rtrim(local_copy);
+    return &local_copy;
+}
+
 void die_with_error(char *error_text){
     printf("%s", error_text);
     exit(1);

@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 #include <time.h>
+#include <stdio.h>
 #include "client.h"
 #include "utils.h"
 #include "config.h"
@@ -57,10 +58,14 @@ void bind_server(config *conf){
         die_with_error("socket failed");
     }
 
+    int opt = 1;
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     if (bind(server_socket, (struct sockaddr *) &addr,
           sizeof(addr)) < 0) {
         die_with_error("bind failed");
     }
+
+    printf("Listening on %s..\n", conf->bind_to);
 
     listen(server_socket,512);
 }
@@ -72,9 +77,6 @@ void fork_child(server_item *item){
 
     item->state = SERVER_ITEM_AVAILABLE;
 
-        process_client(server_socket, item);
-
-        return;
     pid_t pid = fork();
     if (pid < 0){
         die_with_error("Fork failed");
@@ -84,6 +86,7 @@ void fork_child(server_item *item){
     }
     else if (pid == 0){
         process_client(server_socket, item);
+        exit(0);
     }
 }
 
@@ -106,6 +109,7 @@ void check_children(){
     if (alive_count < config->min_children){
         add_count = config->min_children - alive_count;
     }
+
     if (available_count == 0 && add_count == 0
         && alive_count + 1 < config->max_children
         && alive_count + 1 < MAX_CHILD_COUNT){
@@ -124,9 +128,23 @@ void check_children(){
         for(i = used_children; i < (used_children + add_count); i++){
             fork_child(children + i);
         }
+        used_children += add_count;
     }
 }
 
+void stop_server(){
+    if (server_socket > 0){
+        close(server_socket);
+        server_socket = 0;
+    }
+
+    int i = 0;
+    for(; i < used_children; i++){
+        if (children[i].state != SERVER_ITEM_DEAD){
+             kill(children[i].pid, SIGKILL);
+        }
+    }
+}
 
 void sigchld_handler(int sig)
 {

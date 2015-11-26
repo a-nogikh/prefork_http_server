@@ -22,5 +22,6 @@ void die_with_error(char *error_text);
 char* copy_till(char *src, char *dest, char till, int limit);
 int str_to_sockaddr_ipv4(char *src, struct sockaddr_in *dst);
 int file_length(FILE *file);
+const char * current_time();
 
 #endif // UTILS_H_INCLUDED

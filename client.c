@@ -4,7 +4,9 @@
 #include <sys/sendfile.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <signal.h>
 #include <errno.h>
+#include <sys/prctl.h>
 #include "client.h"
 #include "http_parser.h"
 #include "parent.h"
@@ -13,12 +15,15 @@
 #include "http_writer.h"
 #include "utils.h"
 
+void write_file(int file_d, int socket_d);
 
 void process_client(int server_socket, server_item *item){
+    prctl(PR_SET_PDEATHSIG, SIGHUP);
+
     char buffer[1024];
     config *config  = config_get();
-
     int processed_clients = 0;
+
     while(1){
         if (processed_clients >= config->child_max_queries){
             exit(0);
@@ -27,7 +32,7 @@ void process_client(int server_socket, server_item *item){
         item->state = SERVER_ITEM_AVAILABLE;
 
         struct sockaddr_in client_addr;
-        int client_addr_len = sizeof(client_addr);printf("d");
+        int client_addr_len = sizeof(client_addr);
         int fd = accept(server_socket, (struct sockaddr *) &client_addr, &client_addr_len);
 
         if (fd < 0){
@@ -102,6 +107,11 @@ void process_client(int server_socket, server_item *item){
             strcpy(request->path, "/index.html");
         }
 
+        // chop off part after ?
+        char *tmp = request->path;
+        while (*tmp != '\0' && *tmp != '?' && *tmp != '#') tmp++;
+        *tmp = '\0';
+
         respond_file(fd, host, request->path);
         END_CLIENT(item, fd, request);
 
@@ -127,7 +137,7 @@ void respond_file(int fd, config_host *host, char *path){
     curr += path_len;
     *curr = '\0';
 
-    FILE *file = fopen(curr, "rb");
+    FILE *file = fopen(fullpath, "rb");
     if (file == NULL){
         STATUS_404(fd, HTTP_1_0);
         write_error_headers(fd);
@@ -141,12 +151,21 @@ void respond_file(int fd, config_host *host, char *path){
     PARAM_CONTENT_LENGTH(fd, len);
     PARAM_CONTENT_TYPE(fd, detect_mime_type(path, file));
     http_empty_line(fd);
-    sendfile(fd, file, NULL, len);
+    write_file(file, fd);
+}
+
+void write_file(int file_d, int socket_d){
+    char data[SEND_BUFFER_SIZE];
+
+    size_t n = 0;
+    while ( (n = fread(data, sizeof(char), SEND_BUFFER_SIZE, file_d)) > 0)
+    {
+        write(socket_d, data, n);
+    }
 }
 
 void write_base_headers(int fd){
-    char *time = asctime();
-    PARAM_DATE(fd, time);
+    PARAM_DATE(fd, current_time());
     PARAM_SERVER(fd, SERVER_NAME);
     PARAM_CONNECTION(fd, "closed");
 }

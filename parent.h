@@ -13,10 +13,12 @@ typedef enum {
 struct server_item{
     ServerItemState state;
     pid_t pid;
+    int served;
 };
 typedef struct server_item server_item;
 
 void init_server();
 void check_children();
+void stop_server();
 
 #endif // PARENT_H_INCLUDED
