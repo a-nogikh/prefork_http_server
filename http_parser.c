@@ -46,10 +46,7 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
         int line_size = line_end - request->header_curr - 1;
         if (line_size <= 0){
             // Processing empty line case
-            if(request->state == STATE_PROCESSING_HEADER && request->seq_empty_line_count == 0){
-                request->seq_empty_line_count++;
-            }
-            else if (request->state == STATE_PROCESSING_HEADER && request->seq_empty_line_count == 1){
+            if (request->state == STATE_PROCESSING_HEADER){
                 // end of header
                 request->state = STATE_HEADER_DONE;
                 return max(line_end + 1 - orig_to, 0);
@@ -62,15 +59,17 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
         }
         else{
             // Processing non-empty line
-            if (request->state == STATE_PROCESSING_REQUEST_LINE
-                && !http_query_request(request->header_curr, line_end, request)){
-                STOP_ERROR(request);
+            if (request->state == STATE_PROCESSING_REQUEST_LINE){
+                if(http_query_request(request->header_curr, line_end, request)){
+                    request->state = STATE_PROCESSING_HEADER;
+                }else{
+                    STOP_ERROR(request);
+                }
             }else if (request->state == STATE_PROCESSING_HEADER
                 && !http_query_keyvalue(request->header_curr, line_end, request)){
                 STOP_ERROR(request);
             }
             request->header_curr = line_end + 1;
-            request->seq_empty_line_count = 0;
             line_end += 2;
         }
     }
@@ -80,13 +79,6 @@ int http_proceed_request(http_parse_request *request, char *newbuf, int newBufSi
 
 int http_query_request(char *start, char *end, http_parse_request *request){
     start = ltrim(start);
-    int pos = 0;
-    while (*start && !is_wspace(*start)){
-        request->method[pos++] = *start++;
-        if (pos >= METHOD_SIZE_LIMIT){
-            break;
-        }
-    }
     start = copy_till(start, request->method, ' ', METHOD_SIZE_LIMIT);
     if (!start || ! (*start)){
         return 0;
@@ -98,7 +90,8 @@ int http_query_request(char *start, char *end, http_parse_request *request){
         return 0;
     }
 
-    start = copy_till(start, request->http_version, ' ', HTTP_VERSION_SIZE_LIMIT);
+    start = ltrim(start);
+    start = copy_till(start, request->http_version, '\r', HTTP_VERSION_SIZE_LIMIT);
     if (!start){
         return 0;
     }
@@ -113,13 +106,14 @@ int http_query_keyvalue(char *start, char *end, http_parse_request *request){
         return 0;
     }
 
-    int key_len = key_end - start + 1;
+    int key_len = key_end - start ;
     key = (char *)malloc(sizeof(char)*(key_len + 1));
     memcpy(key, start, key_len);
     key[key_len] = '\0';
     key = rtrim(key);
 
     start = key_end + 1;
+    start = ltrim(start);
     while(start < end && is_wspace(start)) start++;
 
     int valueLen = end - start;

@@ -41,7 +41,7 @@ void init_server(){
     }
 
     for (i = 0; i < base_fork; i++){
-        fork_child(children[i]);
+        fork_child(children + i);
     }
 
     used_children = base_fork;
@@ -71,6 +71,10 @@ void fork_child(server_item *item){
     }
 
     item->state = SERVER_ITEM_AVAILABLE;
+
+        process_client(server_socket, item);
+
+        return;
     pid_t pid = fork();
     if (pid < 0){
         die_with_error("Fork failed");

@@ -74,12 +74,12 @@ int str_to_sockaddr_ipv4(char *src, struct sockaddr_in *dst){
     }
 
     char *ep;
-    int n = strtol(port_p, ep, 10);
+    int n = strtol(port_p, &ep, 10);
     if (*ep != 0 || n <= 0){
         return 0;
     }
 
-    dst->sin_port = n;
+    dst->sin_port = htons(n);
     dst->sin_family = AF_INET;
     return 1;
 }

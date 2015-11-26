@@ -27,8 +27,9 @@ void process_client(int server_socket, server_item *item){
         item->state = SERVER_ITEM_AVAILABLE;
 
         struct sockaddr_in client_addr;
-        int client_addr_len = sizeof(client_addr);
+        int client_addr_len = sizeof(client_addr);printf("d");
         int fd = accept(server_socket, (struct sockaddr *) &client_addr, &client_addr_len);
+
         if (fd < 0){
             switch(errno){
                 case EAGAIN:
@@ -144,7 +145,8 @@ void respond_file(int fd, config_host *host, char *path){
 }
 
 void write_base_headers(int fd){
-    PARAM_DATE(fd, asctime());
+    char *time = asctime();
+    PARAM_DATE(fd, time);
     PARAM_SERVER(fd, SERVER_NAME);
     PARAM_CONNECTION(fd, "closed");
 }

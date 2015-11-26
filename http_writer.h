@@ -15,11 +15,11 @@ void http_empty_line(int fd);
 #define STATUS_500(fd, http_version) http_write_status_line(fd, http_version, "500", "Internal Server Error");
 
 
-#define PARAM_DATE(fd, value)              http_write_header(fd, "Date", value);
-#define PARAM_SERVER(fd, value)            http_write_header(fd, "Server", value);
-#define PARAM_CONTENT_LENGTH(fd, value)    http_write_int_header(fd, "Content-Length", value);
-#define PARAM_CONTENT_TYPE(fd, value)      http_write_header(fd, "Content-Type", value);
-#define PARAM_CONNECTION(fd, value)        http_write_header(fd, "Connection", value);
+#define PARAM_DATE(fd, value)              http_write_header(fd, "Date", value)
+#define PARAM_SERVER(fd, value)            http_write_header(fd, "Server", value)
+#define PARAM_CONTENT_LENGTH(fd, value)    http_write_int_header(fd, "Content-Length", value)
+#define PARAM_CONTENT_TYPE(fd, value)      http_write_header(fd, "Content-Type", value)
+#define PARAM_CONNECTION(fd, value)        http_write_header(fd, "Connection", value)
 
 
 #endif // HTTP_WRITER_H_INCLUDED
