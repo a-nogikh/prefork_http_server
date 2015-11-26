@@ -5,9 +5,11 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <sys/prctl.h>
-#include "client.h"
+#include "child.h"
 #include "http_parser.h"
 #include "parent.h"
 #include "config.h"
@@ -15,7 +17,10 @@
 #include "http_writer.h"
 #include "utils.h"
 
-void write_file(int file_d, int socket_d);
+void write_file(FILE *file_d, int socket_d);
+void write_error_headers(int fd);
+void write_base_headers(int fd);
+void respond_file(int fd, config_host *host, char *path);
 
 void process_client(int server_socket, server_item *item){
     prctl(PR_SET_PDEATHSIG, SIGHUP);
@@ -55,7 +60,7 @@ void process_client(int server_socket, server_item *item){
             if (c <= 0){
                 break;
             }
-            int used = http_proceed_request(request, buffer, c);
+            http_proceed_request(request, buffer, c);
             if (request->state == STATE_ERROR || request->state == STATE_HEADER_DONE){
                 break;
             }
@@ -63,7 +68,7 @@ void process_client(int server_socket, server_item *item){
         processed_clients++;
 
         if (request->state != STATE_HEADER_DONE){
-            if (request->state == STATE_ERROR && strlen){
+            if (request->state == STATE_ERROR){
                 STATUS_400(fd, HTTP_1_0);
                 write_error_headers(fd);
                 END_CLIENT(item, fd, request);
@@ -154,7 +159,7 @@ void respond_file(int fd, config_host *host, char *path){
     write_file(file, fd);
 }
 
-void write_file(int file_d, int socket_d){
+void write_file(FILE *file_d, int socket_d){
     char data[SEND_BUFFER_SIZE];
 
     size_t n = 0;

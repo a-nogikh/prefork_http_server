@@ -34,6 +34,9 @@ const char* detect_mime_type(char *filename, FILE *fd){
     if (stricmp(ext, "txt") == 0){
         return "text/plain";
     }
+    if (stricmp(ext, "pdf") == 0){
+        return "application/pdf";
+    }
 
     return "text/html";
 }

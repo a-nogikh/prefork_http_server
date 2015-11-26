@@ -31,10 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="client.c">
+		<Unit filename="child.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="client.h" />
+		<Unit filename="child.h" />
 		<Unit filename="config.c">
 			<Option compilerVar="CC" />
 		</Unit>

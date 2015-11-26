@@ -40,9 +40,9 @@ OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/server
 
-OBJ_DEBUG = $(OBJDIR_DEBUG)/http_writer.o $(OBJDIR_DEBUG)/utils.o $(OBJDIR_DEBUG)/parent.o $(OBJDIR_DEBUG)/mime.o $(OBJDIR_DEBUG)/main.o $(OBJDIR_DEBUG)/client.o $(OBJDIR_DEBUG)/http_parser.o $(OBJDIR_DEBUG)/config_parser.o $(OBJDIR_DEBUG)/config.o
+OBJ_DEBUG = $(OBJDIR_DEBUG)/http_writer.o $(OBJDIR_DEBUG)/utils.o $(OBJDIR_DEBUG)/parent.o $(OBJDIR_DEBUG)/mime.o $(OBJDIR_DEBUG)/main.o $(OBJDIR_DEBUG)/child.o $(OBJDIR_DEBUG)/http_parser.o $(OBJDIR_DEBUG)/config_parser.o $(OBJDIR_DEBUG)/config.o
 
-OBJ_RELEASE = $(OBJDIR_RELEASE)/http_writer.o $(OBJDIR_RELEASE)/utils.o $(OBJDIR_RELEASE)/parent.o $(OBJDIR_RELEASE)/mime.o $(OBJDIR_RELEASE)/main.o $(OBJDIR_RELEASE)/client.o $(OBJDIR_RELEASE)/http_parser.o $(OBJDIR_RELEASE)/config_parser.o $(OBJDIR_RELEASE)/config.o
+OBJ_RELEASE = $(OBJDIR_RELEASE)/http_writer.o $(OBJDIR_RELEASE)/utils.o $(OBJDIR_RELEASE)/parent.o $(OBJDIR_RELEASE)/mime.o $(OBJDIR_RELEASE)/main.o $(OBJDIR_RELEASE)/child.o $(OBJDIR_RELEASE)/http_parser.o $(OBJDIR_RELEASE)/config_parser.o $(OBJDIR_RELEASE)/config.o
 
 all: debug release
 
@@ -74,8 +74,8 @@ $(OBJDIR_DEBUG)/mime.o: mime.c
 $(OBJDIR_DEBUG)/main.o: main.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c main.c -o $(OBJDIR_DEBUG)/main.o
 
-$(OBJDIR_DEBUG)/client.o: client.c
-	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c client.c -o $(OBJDIR_DEBUG)/client.o
+$(OBJDIR_DEBUG)/child.o: child.c
+	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c child.c -o $(OBJDIR_DEBUG)/child.o
 
 $(OBJDIR_DEBUG)/http_parser.o: http_parser.c
 	$(CC) $(CFLAGS_DEBUG) $(INC_DEBUG) -c http_parser.c -o $(OBJDIR_DEBUG)/http_parser.o
@@ -117,8 +117,8 @@ $(OBJDIR_RELEASE)/mime.o: mime.c
 $(OBJDIR_RELEASE)/main.o: main.c
 	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c main.c -o $(OBJDIR_RELEASE)/main.o
 
-$(OBJDIR_RELEASE)/client.o: client.c
-	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c client.c -o $(OBJDIR_RELEASE)/client.o
+$(OBJDIR_RELEASE)/child.o: child.c
+	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c child.c -o $(OBJDIR_RELEASE)/child.o
 
 $(OBJDIR_RELEASE)/http_parser.o: http_parser.c
 	$(CC) $(CFLAGS_RELEASE) $(INC_RELEASE) -c http_parser.c -o $(OBJDIR_RELEASE)/http_parser.o

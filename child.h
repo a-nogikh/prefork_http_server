@@ -1,5 +1,5 @@
-#ifndef CLIENT_H_INCLUDED
-#define CLIENT_H_INCLUDED
+#ifndef CHILD_H_INCLUDED
+#define CHILD_H_INCLUDED
 
 
 #include "parent.h"
@@ -12,4 +12,4 @@
 
 void process_client(int server_socket, server_item *item);
 
-#endif // CLIENT_H_INCLUDED
+#endif // CHILD_H_INCLUDED
