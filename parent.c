@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <time.h>
 #include <stdio.h>
-#include "client.h"
+#include "child.h"
 #include "utils.h"
 #include "config.h"
 
